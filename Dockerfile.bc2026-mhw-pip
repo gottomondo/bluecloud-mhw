@@ -1,0 +1,7 @@
+# docker buildx build --platform linux/amd64 -t fpalermo/bc2026-mhw-pip:dev -f ./Dockerfile.bc2026-mhw-pip .
+# docker push fpalermo/bc2026-mhw-pip:dev 
+
+FROM python:3.13.1
+COPY requirements.txt requirements.txt
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
