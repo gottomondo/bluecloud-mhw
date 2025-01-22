@@ -30,15 +30,17 @@ import cartopy.feature as cfeature
 warnings.filterwarnings("ignore") # Ignore all warnings
 
 import sys
+from config import CMEMS_datasets_options
 
 args = sys.argv
 
-script_name = "mhw-method-maps.py"
+# script_name = "mhw-method-maps.py"
+script_name = args[0]
 
 if len(sys.argv) != 5:
-	print("Usage: python {} {} {} {} {}".format(script_name, "<data_source>", "<data_path>", "<doi>","<output_path>"))
-    # print("Example: python ./{} SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2 tmp 20241010 outputs".format(script_name))
-	sys.exit(1)
+    print("Usage: python {} {} {} {} {}".format(script_name, "<data_source>", "<data_path>", "<doi>","<output_path>"))
+    print("Example: python ./{} SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2 tmp 20241010 outputs".format(script_name))
+    sys.exit(1)
     
 # inputs
 data_source = args[1]
@@ -74,12 +76,12 @@ latmax_input = MockObj(value = lat_max)
 # 
 # - Climatology data: Long-term averages (from 1987–2021) to provide a baseline for comparing the CMEMS data.
 
-CMEMS_datasets_options = {'cmems_SST_MED_SST_L4_REP_OBSERVATIONS_010_021':{'varname':  "analysed_sst", "prod_type": 'REP',
-                                                                         'grid_file':"prev/cell_areas_CMS.nc",
-                                                                         'clim_file':"CMS_SST_Climatology_19872021.nc"},
-                        'SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2': {'varname':  "analysed_sst", "prod_type": 'NRT',
-                                                                         'grid_file':"2024/cell_areas_CMS_NRT.nc",
-                                                                         'clim_file':"CMS_SST_Climatology_19872021_rect00625.nc"}}
+# CMEMS_datasets_options = {'cmems_SST_MED_SST_L4_REP_OBSERVATIONS_010_021':{'varname':  "analysed_sst", "prod_type": 'REP',
+#                                                                          'grid_file':"prev/cell_areas_CMS.nc",
+#                                                                          'clim_file':"CMS_SST_Climatology_19872021.nc"},
+#                         'SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2': {'varname':  "analysed_sst", "prod_type": 'NRT',
+#                                                                          'grid_file':"2024/cell_areas_CMS_NRT.nc",
+#                                                                          'clim_file':"CMS_SST_Climatology_19872021_rect00625.nc"}}
 
 # # CMEMS datasets selection
 # print('Please select a Copernicus Marine Service (CMEMS) dataset:')
