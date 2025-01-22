@@ -1,8 +1,8 @@
 requests
-xarray
-numpy
-matplotlib
-netcdf4
-cartopy
-scipy
-wget
+# xarray
+# numpy
+# matplotlib
+# netcdf4
+# cartopy
+# scipy
+# wget
