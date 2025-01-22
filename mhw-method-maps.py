@@ -29,6 +29,44 @@ import cartopy.feature as cfeature
 
 warnings.filterwarnings("ignore") # Ignore all warnings
 
+import sys
+
+args = sys.argv
+
+script_name = "mhw-method-maps.py"
+
+if len(sys.argv) != 5:
+	print("Usage: python {} {} {} {} {}".format(script_name, "<data_source>", "<data_path>", "<doi>","<output_path>"))
+    # print("Example: python ./{} SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2 tmp 20241010 outputs".format(script_name))
+	sys.exit(1)
+    
+# inputs
+data_source = args[1]
+data_path = args[2]
+doi = args[3]
+output_path = args[4]
+# italy region
+lon_min, lon_max = 0, 20
+lat_min, lat_max = 34, 46
+# lon_min, lon_max = -5, 1
+# lat_min, lat_max = 34, 42
+# lon_min, lon_max = 11.36, 38.93
+# lat_min, lat_max = 18, 41.3
+
+# class for generating mock object
+class MockObj:
+    def __init__(self, value):
+        self.value = value
+#
+# objects conversions
+#
+date_picker = MockObj(value = datetime.strptime(args[3], "%Y%m%d"))
+
+lonmin_input = MockObj(value = lon_min)
+lonmax_input = MockObj(value = lon_max)
+latmin_input = MockObj(value = lat_min)
+latmax_input = MockObj(value = lat_max)
+
 
 # ### 1. Select the CMEMS dateset of interest
 # - Mediterranean Satellite Reprocessed (REP) Sea Surface Temperature (SST) with data from 1982
@@ -48,22 +86,22 @@ CMEMS_datasets_options = {'cmems_SST_MED_SST_L4_REP_OBSERVATIONS_010_021':{'varn
 # datasets_dropdown = widgets.Dropdown(options = CMEMS_datasets_options.keys(), description = 'Dataset:', disabled = False)
 # display(datasets_dropdown) # Display the dropdown
 
+dataset_id = data_source
 
 # paths
-clim_path  = "~/blue-cloud-dataspace/MEI/CMCC/MHW/input/clim/"
+# clim_path  = "~/blue-cloud-dataspace/MEI/CMCC/MHW/input/clim/"
 # clim_path  = "/workspace/VREFolders/MarineEnvironmentalIndicators/input_datasets/mhw/clim"
-
+clim_path = data_path
 
 # Set outputs dir
-out_dir    = "/workspace/MHW_figures/Maps/"
+# out_dir    = "/workspace/MHW_figures/Maps/"
+out_dir = output_path
 os.makedirs(out_dir, exist_ok=True) # Check if the directory exists; create it if it doesn't
-
 
 ## MHW settings
 time_dim   = 'time'
 ndays_mhw  = 12 # number of days to consider in identifying and masking the MHWs
 delta_days = timedelta(ndays_mhw-1)
-
 
 # # 2. Load and set
 # - Open climatology dataset
@@ -77,8 +115,6 @@ t0=time.time()
 clim_rawdataset = xr.open_dataset(os.path.join(clim_path,CMEMS_datasets_options[dataset_id]['clim_file']))
 print(f"\tDone ({time.time() - t0:.1f}s).")
 
-
-dataset_id = datasets_dropdown.value
 varname    = CMEMS_datasets_options[dataset_id]['varname']
 prod       = CMEMS_datasets_options[dataset_id]['prod_type']
 print('Selected dataset -> %s'%(dataset_id))
@@ -95,29 +131,25 @@ print('\tElapsed time: %ss'%(round(time.time()-t0,1)))
 date_min = datetime.utcfromtimestamp(min(cms_rawdataset[time_dim].values).astype('datetime64[s]').astype(int)).date()
 date_max = datetime.utcfromtimestamp(max(cms_rawdataset[time_dim].values).astype('datetime64[s]').astype(int)).date()
 date_min_delta = date_min + delta_days
-date_picker    = widgets.DatePicker(description='Date', disabled=False,value=date_max, min=date_min_delta, max=date_max)
-print('\nPlease select the date of interest:\nDataset limits -> from %s to %s' %(date_min_delta, date_max))
-display(date_picker) # Displaying a DatePicker widget to select the date of interest
-
+# date_picker    = widgets.DatePicker(description='Date', disabled=False,value=date_max, min=date_min_delta, max=date_max)
+# print('\nPlease select the date of interest:\nDataset limits -> from %s to %s' %(date_min_delta, date_max))
+# display(date_picker) # Displaying a DatePicker widget to select the date of interest
 
 # Setting region of interest
 print('\nInsert the coordinates of the region of interest:\nThe standard values are the dataset limits.')
 n_dec = 3
 # lon_min, lon_max = np.round(cms_rawdataset.longitude.min().item(),n_dec), np.round(cms_rawdataset.longitude.max().item(),n_dec)
 # lat_min, lat_max = np.round(cms_rawdataset.latitude.min().item(),n_dec),  np.round(cms_rawdataset.latitude.max().item(),n_dec)
-# lon_min, lon_max = -5, 1
-# lat_min, lat_max = 34, 42
-lon_min, lon_max = 11.36, 38.93
-lat_min, lat_max = 18, 41.3
-lonmin_input = widgets.BoundedFloatText(description='Minimum:',value=lon_min,min=lon_min,max=lon_max,)
-lonmax_input = widgets.BoundedFloatText(description='Maximum:',value=lon_max,min=lon_min,max=lon_max,)
-latmin_input = widgets.BoundedFloatText(description='Minimum:',value=lat_min,min=lat_min,max=lat_max,)
-latmax_input = widgets.BoundedFloatText(description='Maximum:',value=lat_max,min=lat_min,max=lat_max,)
-# Display the widgets to select the region of interest
-print('Longitude:')
-display(widgets.VBox([lonmin_input, lonmax_input]))
-print('Latitude:')
-display(widgets.VBox([latmin_input, latmax_input]))
+
+# lonmin_input = widgets.BoundedFloatText(description='Minimum:',value=lon_min,min=lon_min,max=lon_max,)
+# lonmax_input = widgets.BoundedFloatText(description='Maximum:',value=lon_max,min=lon_min,max=lon_max,)
+# latmin_input = widgets.BoundedFloatText(description='Minimum:',value=lat_min,min=lat_min,max=lat_max,)
+# latmax_input = widgets.BoundedFloatText(description='Maximum:',value=lat_max,min=lat_min,max=lat_max,)
+# # Display the widgets to select the region of interest
+# print('Longitude:')
+# display(widgets.VBox([lonmin_input, lonmax_input]))
+# print('Latitude:')
+# display(widgets.VBox([latmin_input, latmax_input]))
 
 
 # ### 3. Filtering and Processing the Datasets
@@ -197,8 +229,9 @@ t0=time.time()
 anomaly, MHW = intensity(dataset_cms[varname].values,dataset_clim.pc90.values,dataset_clim.clim.values)
 print(f"\tDone ({time.time() - t0:.1f}s).")
 
-# output_file = os.path.join(out_dir,"MHWmap_CMEMS_%s_%s_Lons[%sto%s]Lats[%sto%s].nc"%(prod,datestr,lonmin_input.value,lonmax_input.value,latmin_input.value,latmax_input.value))
-output_file = os.path.join(out_dir,"t.nc")
+output_file = os.path.join(out_dir,"MHWmap_CMEMS_%s_%s_Lons[%sto%s]Lats[%sto%s].nc"%(prod,datestr,lonmin_input.value,lonmax_input.value,latmin_input.value,latmax_input.value))
+# output_file = os.path.join(out_dir,"t.nc")
+
 print('Saving the results in a .nc file...')
 dataset_anomaly = xr.Dataset({"anomaly": (["lat", "lon"], anomaly[-1,:,:]),"MHW": (["lat", "lon"], MHW[-1,:,:]),},
                              coords={"time": '%s-%s-%sT00:00:00'%(target_date.year,target_date.month,target_date.day),
