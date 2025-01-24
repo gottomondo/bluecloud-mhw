@@ -47,9 +47,11 @@ data_source = args[1]
 data_path = args[2]
 outputs_path = args[3]
 doi = args[4]
-lon_min, lon_max = args[5], args[6]
-lat_min, lat_max = args[7], args[8]
+lon_min, lon_max = float(args[5]), float(args[6])
+lat_min, lat_max = float(args[7]), float(args[8])
 
+# print(lat_min, lat_max)
+# sys.exit(1)
 # italy region
 # lon_min, lon_max = 0, 20
 # lat_min, lat_max = 34, 46
@@ -71,7 +73,6 @@ lonmin_input = MockObj(value = lon_min)
 lonmax_input = MockObj(value = lon_max)
 latmin_input = MockObj(value = lat_min)
 latmax_input = MockObj(value = lat_max)
-
 
 # ### 1. Select the CMEMS dateset of interest
 # - Mediterranean Satellite Reprocessed (REP) Sea Surface Temperature (SST) with data from 1982
