@@ -38,18 +38,21 @@ args = sys.argv
 script_name = args[0]
 
 if len(sys.argv) != 5:
-    print("Usage: python {} {} {} {} {}".format(script_name, "<data_source>", "<data_path>", "<doi>","<output_path>"))
-    print("Example: python ./{} SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2 tmp 20241010 outputs".format(script_name))
+    print("Usage: python {}  {{ data_source }} {{ data_path }} {{ outputs_path }} {{ doi }} {{ lon_min }} {{ lon_max }} {{ lat_min }} {{ lat_max }}".format(script_name))
+    print("Example: python ./{} SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2 /data /outputs 20240601 18 41.3 11.36 38.93".format(script_name))
     sys.exit(1)
     
 # inputs
 data_source = args[1]
 data_path = args[2]
-doi = args[3]
-output_path = args[4]
+outputs_path = args[3]
+doi = args[4]
+lon_min, lon_max = args[5], args[6]
+lat_min, lat_max = args[7], args[8]
+
 # italy region
-lon_min, lon_max = 0, 20
-lat_min, lat_max = 34, 46
+# lon_min, lon_max = 0, 20
+# lat_min, lat_max = 34, 46
 # lon_min, lon_max = -5, 1
 # lat_min, lat_max = 34, 42
 # lon_min, lon_max = 11.36, 38.93
