@@ -37,7 +37,7 @@ args = sys.argv
 # script_name = "mhw-method-maps.py"
 script_name = args[0]
 
-if len(sys.argv) != 5:
+if len(sys.argv) != 9:
     print("Usage: python {}  {{ data_source }} {{ data_path }} {{ outputs_path }} {{ doi }} {{ lon_min }} {{ lon_max }} {{ lat_min }} {{ lat_max }}".format(script_name))
     print("Example: python ./{} SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2 /data /outputs 20240601 18 41.3 11.36 38.93".format(script_name))
     sys.exit(1)
@@ -65,7 +65,7 @@ class MockObj:
 #
 # objects conversions
 #
-date_picker = MockObj(value = datetime.strptime(args[3], "%Y%m%d"))
+date_picker = MockObj(value = datetime.strptime(doi, "%Y%m%d"))
 
 lonmin_input = MockObj(value = lon_min)
 lonmax_input = MockObj(value = lon_max)
@@ -100,7 +100,7 @@ clim_path = data_path
 
 # Set outputs dir
 # out_dir    = "/workspace/MHW_figures/Maps/"
-out_dir = output_path
+out_dir = outputs_path
 os.makedirs(out_dir, exist_ok=True) # Check if the directory exists; create it if it doesn't
 
 ## MHW settings
