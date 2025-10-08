@@ -1,5 +1,5 @@
-# method mhw
-#
+# mock up method
+# it just saves the input parameters to a text file
 
 import argparse
 from datetime import datetime
