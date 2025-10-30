@@ -56,7 +56,7 @@ CMEMS_datasets_options = {
             },
             "1993-2022": {
                 "file": "MEDREA_native_Climatology_depth0_19932022.nc",
-                "url": ""
+                "url": "SYNC WIth DATASPACE changed by raf"
             },
         },
         'region_folder': 'MFS_CMS'

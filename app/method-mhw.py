@@ -4,7 +4,7 @@ MHW method implementation using Copernicus Marine Service data
 
     Examples of usage:
     1) Generate MHW map for Mediterranean full region 
-        python method-mhw.py --outputs_path "./out" --data_source '["SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2"]' --id_output_type "mhw_ta_map" --working_domain '{ "box": [[ -18.125,  30.125, 36.325,  46.025]] }' --start_time "2025-10-08" --climatology "1987-2021" --data_path "./input/"
+        python method-mhw.py --outputs_path "./out" --data_source '["SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2"]' --id_output_type "mhw_ta_map" --working_domain '{ "box": [[ -18.125,  30.125, 36.325,  46.025 ]] }' --start_time "2025-10-08" --climatology "1987-2021" --data_path "./input/"
 
     2) Generate MHW map for Mediterranean sub region 
         python method-mhw.py --outputs_path "./out" --data_source '["SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2"]' --id_output_type "mhw_ta_map" --working_domain '{ "box": [[-4.99, 34, 1, 42]] }' --start_time "2025-10-08" --climatology "1987-2021" --data_path "./input/"
@@ -126,27 +126,73 @@ def main():
         prod2plot = prod + ' Satellite Observations'
 
     # choose and validate climatology file (existing handling)
-    clim_entry = meta.get("clim_file")[climatology]
-    clim_file = os.path.join(data_path, clim_entry.get("file"))
-    print(f"Selected climatology: {climatology} -> {clim_file}")
+    # check config has grid/area entries
+    grid_file_rel = meta.get("grid_file")
+    area_file_rel = meta.get("area_file")
+    if not grid_file_rel or not area_file_rel:
+        raise SystemExit("ERROR: config missing 'grid_file' or 'area_file' for dataset")
+    grid_path = os.path.join(data_path, str(grid_file_rel))
+    area_path = os.path.join(data_path, str(area_file_rel))
+    # check files exist locally
+    missing = []
+    if not os.path.isfile(grid_path):
+        missing.append(grid_path)
+    if not os.path.isfile(area_path):
+        missing.append(area_path)
 
-    clim_rawdataset = xr.open_dataset(clim_file)
-    clim_ref = extract_clim_ref(clim_file)
+    # resolve chosen climatology entry and file path
+    try:
+        clim_meta = meta.get("clim_file")
+        clim_entry = clim_meta[climatology]
+        clim_file_rel = clim_entry.get("file")
+    except Exception:
+        raise SystemExit(f"ERROR: climatology '{climatology}' not found in config for dataset")
+    clim_path = os.path.join(data_path, str(clim_file_rel))
+    if not os.path.isfile(clim_path):
+        missing.append(clim_path)
+
+    if missing:
+        print("ERROR: required files missing in data_path:")
+        for p in missing:
+            print("  -", p)
+        print("Run the downloader to fetch grid/area/climatology for this dataset, then retry.")
+        raise SystemExit(1)
+
+    print(f"Selected climatology: {climatology} -> {clim_path}")
+    try:
+        clim_rawdataset = xr.open_dataset(clim_path)
+    except Exception as e:
+        raise SystemExit(f"ERROR opening climatology file '{clim_path}': {e}")
+    clim_ref = extract_clim_ref(clim_path)
     print("Opening climatology file... from", clim_ref)
     # print(clim_rawdataset)
     # return
     # query CMEMS
     print("Querying copernicusmarine api...")
-    t0 = time.time()
-    params = {"credentials_file": ".bc2026_copernicusmarine-credentials",
+    params = {"credentials_file": "/app/.bc2026_copernicusmarine-credentials",
               "dataset_id": dataset_id, "variables": [varname], "maximum_depth": 1.5}
-    cmems_rawdataset = copernicusmarine.open_dataset(**params)
+    t0 = time.time()
+    try:
+        cmems_rawdataset = copernicusmarine.open_dataset(**params)
+        if cmems_rawdataset is None:
+            raise SystemExit(f"ERROR: copernicusmarine returned no dataset for id '{dataset_id}'")  
+    except Exception as e:
+        raise SystemExit(f"ERROR opening CMEMS dataset '{dataset_id}': {e}")
+    
     print(f"\tElapsed time: {time.time() - t0:.1f}s")
+
+    print("Opened CMEMS dataset:")
+    print(copernicusmarine, cmems_rawdataset)
+    # return
 
     # determine available date range and target date
     time_dim = 'time'
-    date_min = datetime.utcfromtimestamp(min(cmems_rawdataset[time_dim].values).astype('datetime64[s]').astype(int)).date()
-    date_max = datetime.utcfromtimestamp(max(cmems_rawdataset[time_dim].values).astype('datetime64[s]').astype(int)).date()
+
+    import pandas as pd
+    times = pd.to_datetime(cmems_rawdataset[time_dim].values)
+    date_min = times.min().date()
+    date_max = times.max().date()
+
     date_min_delta = date_min + timedelta(ndays_mhw)
 
     # choose target date: prefer provided end_time, otherwise latest available
@@ -172,15 +218,9 @@ def main():
     dataset_cmems = standardize_dim_names(dataset_cmems)
     dataset_clim = standardize_dim_names(dataset_clim)
 
-    dataset_cmems.to_netcdf("debug_cmems_pre_filter.nc")
-    dataset_clim.to_netcdf("debug_clim_pre_filter.nc")  
-
     print("Filtering by region of interest ...")
     dataset_cmems = filter_box(dataset_cmems,lonmin_input,lonmax_input,latmin_input,latmax_input,lat_var='latitude',lon_var='longitude')
     dataset_clim  = filter_box(dataset_clim,lonmin_input,lonmax_input,latmin_input,latmax_input,lat_var='latitude',lon_var='longitude')
-
-    dataset_cmems.to_netcdf("debug_cmems_post_filter.nc")
-    dataset_clim.to_netcdf("debug_clim_post_filter.nc")   
    
     print("Computing Anomaly and Marine HeatWaves (MHW)...")
     t0 = time.time()
