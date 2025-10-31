@@ -151,7 +151,7 @@ def main():
     # return
     # query CMEMS
     print("Querying copernicusmarine api...")
-    params = {"credentials_file": "/app/.bc2026_copernicusmarine-credentials",
+    params = {"credentials_file": ".bc2026_copernicusmarine-credentials",
               "dataset_id": dataset_id, "variables": [varname], "maximum_depth": 1.5}
     t0 = time.time()
     try:
