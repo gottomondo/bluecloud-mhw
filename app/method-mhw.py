@@ -64,24 +64,6 @@ def parse_args():
 
 import json
 
-# write inputs file (restore)
-def write_inputs_file(out_dir: str, args, start_time_dt, end_time_dt):
-    os.makedirs(out_dir, exist_ok=True)
-    path = os.path.join(out_dir, "inputs.txt")
-    with open(path, "w") as f:
-        f.write(f"data_source: {args.data_source}\n")
-        f.write(f"outputs_path: {out_dir}\n")
-        f.write(f"id_output_type: {args.id_output_type}\n")
-        f.write(f"working_domain (raw): {args.working_domain}\n")
-        f.write(f"start_time: {start_time_dt.strftime('%Y-%m-%d')}\n")
-        if end_time_dt:
-            f.write(f"end_time: {end_time_dt.strftime('%Y-%m-%d')}\n")
-        f.write(f"climatology: {args.climatology}\n")
-        if args.data_path:
-            f.write(f"data_path: {args.data_path}\n")
-        # f.write(f"ndays: {args.ndays}\n")
-    print(f"Inputs written to {path}")
-
 def main():
     # settings 
     # clim_path = "clim"

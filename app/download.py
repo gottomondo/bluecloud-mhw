@@ -10,6 +10,7 @@ import sys
 import time
 import argparse
 from typing import Optional, Tuple
+import ast
 
 import requests
 
@@ -87,7 +88,7 @@ def main():
     p.add_argument("--delay", type=int, default=5, help="Delay between retries (s)")
     args = p.parse_args()
 
-    ds = args.data_source
+    ds = ast.literal_eval(args.data_source)[0]
     data_path = args.data_path
     clim_key = args.climatology
 
