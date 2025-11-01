@@ -14,6 +14,7 @@ parser.add_argument("--id_output_type", type=str, required=True, help="Output ty
 parser.add_argument("--working_domain", type=str, required=True, help="Working domain")
 parser.add_argument("--start_time", type=str, required=True, help="Start date (YYYY-MM-DD)")
 parser.add_argument("--end_time", type=str, required=False, help="End date (YYYY-MM-DD)")
+parser.add_argument("--climatology", type=str, required=False, help="1993-2021")    ")
 
 args = parser.parse_args()
 
@@ -30,16 +31,30 @@ if args.end_time is not None:
     end_time = datetime.strptime(args.end_time, "%Y-%m-%d")
 else:
     end_time = None  # or set a default value if you want
+climatology = args.climatology
 
-# Save all arguments to outputs.txt in the outputs_path directory
-with open(f"{outputs_path}/inputs.txt", "w") as f:
-    # f.write(f"ccpimage: {ccpimage}\n")
-    f.write(f"repository: {repository}\n")
-    f.write(f"data_path: {data_path}\n")
-    f.write(f"outputs_path: {outputs_path}\n")
-    f.write(f"data_source: {data_source}\n")
-    f.write(f"id_output_type: {id_output_type}\n")
-    f.write(f"working_domain: {working_domain}\n")
-    f.write(f"start_time: {start_time.strftime('%Y-%m-%d')}\n")
-    if args.end_time is not None:
-        f.write(f"end_time: {end_time.strftime('%Y-%m-%d')}\n")
+# Print the parameters (or handle them as needed)
+print("Method mock executed with the following parameters:")
+print(f"Repository: {repository}")
+print(f"Data path: {data_path}")
+print(f"Outputs path: {outputs_path}")
+print(f"Data source: {data_source}")
+print(f"ID output type: {id_output_type}")
+print(f"Working domain: {working_domain}")
+print(f"Start time: {start_time.strftime('%Y-%m-%d')}")
+if end_time is not None:
+    print(f"End time: {end_time.strftime('%Y-%m-%d')}")
+print(f"Climatology: {climatology}")
+
+# # Save all arguments to outputs.txt in the outputs_path directory
+# with open(f"{outputs_path}/inputs.txt", "w") as f:
+#     # f.write(f"ccpimage: {ccpimage}\n")
+#     f.write(f"repository: {repository}\n")
+#     f.write(f"data_path: {data_path}\n")
+#     f.write(f"outputs_path: {outputs_path}\n")
+#     f.write(f"data_source: {data_source}\n")
+#     f.write(f"id_output_type: {id_output_type}\n")
+#     f.write(f"working_domain: {working_domain}\n")
+#     f.write(f"start_time: {start_time.strftime('%Y-%m-%d')}\n")
+#     if args.end_time is not None:
+#         f.write(f"end_time: {end_time.strftime('%Y-%m-%d')}\n")
