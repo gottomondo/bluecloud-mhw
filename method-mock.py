@@ -14,7 +14,7 @@ parser.add_argument("--id_output_type", type=str, required=True, help="Output ty
 parser.add_argument("--working_domain", type=str, required=True, help="Working domain")
 parser.add_argument("--start_time", type=str, required=True, help="Start date (YYYY-MM-DD)")
 parser.add_argument("--end_time", type=str, required=False, help="End date (YYYY-MM-DD)")
-parser.add_argument("--climatology", type=str, required=False, help="1993-2021")    ")
+parser.add_argument("--climatology", type=str, required=False, help="1993-2021")
 
 args = parser.parse_args()
 
