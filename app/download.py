@@ -88,7 +88,11 @@ def main():
     p.add_argument("--delay", type=int, default=5, help="Delay between retries (s)")
     args = p.parse_args()
 
-    ds = ast.literal_eval(args.data_source)[0]
+    # ds = ast.literal_eval(args.data_source)[0]
+    ds = args.data_source
+    print(type(ds), ds)
+    return
+
     data_path = args.data_path
     clim_key = args.climatology
 
