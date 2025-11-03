@@ -52,7 +52,10 @@ def parse_args():
     p.add_argument("--data_path", type=str, required=True, help="Path to input data")
     p.add_argument("--outputs_path", type=str, required=True, help="Path to output data")
     p.add_argument("--data_source", type=str, required=True, help="Dataset ID (key from conf.config)")
-    p.add_argument("--id_output_type", type=str, required=True, help="Output type (e.g., mhw_timeseries)")
+    # keep backward compatibility with --id_output_type
+    p.add_argument("--id_output_type", type=str, required=False,
+                   choices=["mhw_map_anomalies", "mhw_timeseries", "mhw_map_categories"],
+                   help="Output type")
     p.add_argument("--working_domain", type=str, required=True,
                    help="Working domain as JSON string. Format: "
                         "{ \"box\": [[lon_min, lat_min, lon_max, lat_max]], \"depth_layers\": [[depth_min, depth_max]] }")
@@ -227,47 +230,52 @@ def main():
                                f"MHWmap_cmems_{prod}_{datestr}_Lons[{lonmin_input}to{lonmax_input}]_Lats[{latmin_input}to{latmax_input}].nc")
     # return
     # plotting and saving
-    print("Plotting SST Anomaly map...")
-    title1 = f"Copernicus Marine Service {prod2plot}\nSea Surface Temperature (SST) Anomaly and Marine Heat Waves (MHW)"
-    title2 = f"Date: {target_date}\nClimatology: {clim_ref}"
-    fig, ax = _create_fig(title1 + "\n" + title2)
-    map1 = ax.pcolormesh(dataset_anomaly.lon, dataset_anomaly.lat, dataset_anomaly.anomaly,
-                         shading='nearest', vmin=-6, vmax=6, cmap='RdBu_r', transform=ax.projection)
-    ax.contour(dataset_anomaly.lon, dataset_anomaly.lat, dataset_anomaly.MHW, levels=[0.5],
-               colors=['maroon'], linewidths=[1], transform=ax.projection)
-    ax.set_extent([float(dataset_anomaly.lon.values.min()), float(dataset_anomaly.lon.values.max()),
-                   float(dataset_anomaly.lat.values.min()), float(dataset_anomaly.lat.values.max())],
-                  crs=ax.projection)
-    bbox = ax.get_position()
-    cb_ax1 = fig.add_axes([bbox.x1 + 0.01, bbox.y0, 0.015, bbox.height])
-    cbar1 = fig.colorbar(map1, cax=cb_ax1, orientation='vertical', extend='both')
-    cbar1.set_label("°C", rotation=0, labelpad=10)
-    figpng = output_file.replace('.nc', '.png')
-    fig.savefig(figpng, dpi=300)
-    print(f"\tPNG figure saved at '{figpng}'")
 
-    # categories plot
-    print("Plotting MHW Categories plot...")
-    fig2, ax2 = _create_fig(title1 + "\n" + title2)
-    from matplotlib.colors import ListedColormap, BoundaryNorm
-    levels = list(category_info.keys())
-    colors = [category_info[k]["color"] for k in levels]
-    cmap = ListedColormap(colors)
-    norm = BoundaryNorm(levels, ncolors=cmap.N, clip=False)
-    mhw_cats = dataset_anomaly.MHW_cats.values.astype(float)
-    mhw_cats[mhw_cats <= 0] = np.nan
-    m = ax2.pcolormesh(dataset_anomaly.lon, dataset_anomaly.lat, mhw_cats,
-                       cmap=cmap, norm=norm, shading="nearest", transform=ax2.projection, rasterized=True)
-    ax2.set_extent([float(dataset_anomaly.lon.values.min()), float(dataset_anomaly.lon.values.max()),
+    if (id_output_type != "mhw_map_anomalies"):
+        print("Plotting SST Anomaly map...")
+        title1 = f"Copernicus Marine Service {prod2plot}\nSea Surface Temperature (SST) Anomaly and Marine Heat Waves (MHW)"
+        title2 = f"Date: {target_date}\nClimatology: {clim_ref}"
+        fig, ax = _create_fig(title1 + "\n" + title2)
+        map1 = ax.pcolormesh(dataset_anomaly.lon, dataset_anomaly.lat, dataset_anomaly.anomaly,
+                            shading='nearest', vmin=-6, vmax=6, cmap='RdBu_r', transform=ax.projection)
+        ax.contour(dataset_anomaly.lon, dataset_anomaly.lat, dataset_anomaly.MHW, levels=[0.5],
+                colors=['maroon'], linewidths=[1], transform=ax.projection)
+        ax.set_extent([float(dataset_anomaly.lon.values.min()), float(dataset_anomaly.lon.values.max()),
                     float(dataset_anomaly.lat.values.min()), float(dataset_anomaly.lat.values.max())],
-                   crs=ax2.projection)
-    from matplotlib.lines import Line2D
-    legend_elements = [Line2D([0], [0], marker='s', color='w', label=info['name'],
-                              markerfacecolor=info['color'], markersize=8) for _, info in category_info.items()]
-    ax2.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1, 1),
-               ncol=1, frameon=True, title='Categories:')
-    fig2.savefig(output_file.replace('.nc', '_categories.png'), dpi=300)
-    print(f"\tPNG figure saved at '{output_file.replace('.nc', '_categories.png')}'")
+                    crs=ax.projection)
+        bbox = ax.get_position()
+        cb_ax1 = fig.add_axes([bbox.x1 + 0.01, bbox.y0, 0.015, bbox.height])
+        cbar1 = fig.colorbar(map1, cax=cb_ax1, orientation='vertical', extend='both')
+        cbar1.set_label("°C", rotation=0, labelpad=10)
+        figpng = output_file.replace('.nc', '.png')
+        fig.savefig(figpng, dpi=300)
+        print(f"\tPNG figure saved at '{figpng}'")
+    elif (id_output_type == "mhw_map_categories"):
+        # categories plot
+        print("Plotting MHW Categories plot...")
+        fig2, ax2 = _create_fig(title1 + "\n" + title2)
+        from matplotlib.colors import ListedColormap, BoundaryNorm
+        levels = list(category_info.keys())
+        colors = [category_info[k]["color"] for k in levels]
+        cmap = ListedColormap(colors)
+        norm = BoundaryNorm(levels, ncolors=cmap.N, clip=False)
+        mhw_cats = dataset_anomaly.MHW_cats.values.astype(float)
+        mhw_cats[mhw_cats <= 0] = np.nan
+        m = ax2.pcolormesh(dataset_anomaly.lon, dataset_anomaly.lat, mhw_cats,
+                        cmap=cmap, norm=norm, shading="nearest", transform=ax2.projection, rasterized=True)
+        ax2.set_extent([float(dataset_anomaly.lon.values.min()), float(dataset_anomaly.lon.values.max()),
+                        float(dataset_anomaly.lat.values.min()), float(dataset_anomaly.lat.values.max())],
+                    crs=ax2.projection)
+        from matplotlib.lines import Line2D
+        legend_elements = [Line2D([0], [0], marker='s', color='w', label=info['name'],
+                                markerfacecolor=info['color'], markersize=8) for _, info in category_info.items()]
+        ax2.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1, 1),
+                ncol=1, frameon=True, title='Categories:')
+        fig2.savefig(output_file.replace('.nc', '_categories.png'), dpi=300)
+        print(f"\tPNG figure saved at '{output_file.replace('.nc', '_categories.png')}'")
+    elif (id_output_type == "mhw_timeseries"):
+        print("not implemented yet")
+        pass
 
     print("Saving the results in a .nc file...")
     dataset_anomaly.to_netcdf(output_file)
