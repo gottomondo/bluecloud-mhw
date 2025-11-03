@@ -231,7 +231,7 @@ def main():
     # return
     # plotting and saving
 
-    if (id_output_type != "mhw_map_anomalies"):
+    if (id_output_type == "mhw_map_anomalies"):
         print("Plotting SST Anomaly map...")
         title1 = f"Copernicus Marine Service {prod2plot}\nSea Surface Temperature (SST) Anomaly and Marine Heat Waves (MHW)"
         title2 = f"Date: {target_date}\nClimatology: {clim_ref}"
