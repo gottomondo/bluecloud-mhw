@@ -1,8 +1,11 @@
-requests
-xarray
 numpy
+xarray
 matplotlib
 cartopy
-scipy
 copernicusmarine
-# netcdf4
+scipy
+pandas
+# for ts plotting
+plotly
+kaleido
+ipywidgets
