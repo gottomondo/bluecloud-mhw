@@ -274,8 +274,7 @@ def process_maps(args, cmems_rawdataset, clim_rawdataset, meta, outputs_dir,
     })
 
     os.makedirs(outputs_dir, exist_ok=True)
-    output_file = os.path.join(outputs_dir,
-                               f"MHWmap_cmems_{prod}_{datestr}_Lons[{lonmin_input}to{lonmax_input}]_Lats[{latmin_input}to{latmax_input}].nc")
+    output_file = os.path.join(outputs_dir, f"MHW_map_{datestr}_{prod}.nc")
     
     # plotting and saving
     success = False
@@ -354,7 +353,6 @@ def process_timeseries(args, cmems_rawdataset, clim_rawdataset, area_rawdataset,
                       meta, outputs_dir, date_start, date_end, lonmin_input, latmin_input, 
                       lonmax_input, latmax_input, date_min, date_max, varname, prod, prod2plot, 
                       clim_ref, time_dim):
-    """Process timeseries output"""
     
     # MHW settings for timeseries
     ndays_min = 30
@@ -471,13 +469,13 @@ def process_timeseries(args, cmems_rawdataset, clim_rawdataset, area_rawdataset,
 
     print(f'\tElapsed time: {time.time() - t0:.1f}s')
 
-    if filter_by_box: 
-        region_str = f'box[Lon{lonmin_input}to{lonmax_input}][Lat{latmin_input}to{latmax_input}]'
-    else: 
-        if region_name in regions_strings.keys(): 
-            region_str = regions_strings[region_name]
-        else:
-            region_str = region_name
+    # Simplified region string for filenames and detailed for titles
+    if filter_by_box:
+        region_str_file = "box"
+        region_str_title = f"Box: [{lonmin_input}°, {latmin_input}°] to [{lonmax_input}°, {latmax_input}°]"
+    else:
+        region_str_file = region_name if region_name else "region"
+        region_str_title = regions_strings.get(region_name, region_name) if region_name else "Custom Region"
 
     # Create outputs directory
     os.makedirs(outputs_dir, exist_ok=True)
@@ -495,8 +493,8 @@ def process_timeseries(args, cmems_rawdataset, clim_rawdataset, area_rawdataset,
         if PLOTLY_AVAILABLE:
             # Create plotly figure (original code)
             fig = go.Figure()
-            # === Title ===
-            title = f"<b>Copernicus Marine Service {prod2plot}<br>Sea Surface Temperature (SST) and Marine Heat Waves (MHW) events over {region_str}</b>"
+            # === Title === (include coordinates)
+            title = f"<b>Copernicus Marine Service {prod2plot}<br>Sea Surface Temperature (SST) and Marine Heat Waves (MHW) events<br>{region_str_title}</b>"
             fig.add_annotation(dict(text=title, xref="paper", yref="paper", x=0, y=1.15, showarrow=False, align="left", font=dict(size=14)))
 
             # === Categories Filling ===
@@ -564,13 +562,13 @@ def process_timeseries(args, cmems_rawdataset, clim_rawdataset, area_rawdataset,
                             title=dict(text='<b>MHW Categories<br>and Thresholds:<b>', font=dict(size=11))),
             )
 
-            # Set output file
-            output_file = os.path.join(outputs_dir, f"MHWtimeseries_cmems_{prod}_{datestr}_{region_str}.nc").replace(' ', '')
+            # Set output file - SIMPLIFIED NAME
+            output_file = os.path.join(outputs_dir, f"MHW_timeseries_{datestr}.nc")
             fig.write_html(output_file.replace('.nc', '.html'), include_plotlyjs='inline')
             print(f"\tHTML figure saved at '{output_file.replace('.nc', '.html')}'")
             
         else:
-            # Matplotlib fallback
+            # Matplotlib fallback (include coordinates in title)
             print("Using matplotlib fallback...")
             fig_plt, ax = plt.subplots(figsize=(12, 8))
             ax.plot(x, clim, 'k-', linewidth=1, label=f'Climatology ({clim_ref})')
@@ -590,13 +588,14 @@ def process_timeseries(args, cmems_rawdataset, clim_rawdataset, area_rawdataset,
             
             ax.set_ylabel('Temperature (°C)')
             ax.set_title(f'Copernicus Marine Service {prod2plot}\n'
-                        f'SST and Marine Heat Waves over {region_str}\n'
+                        f'SST and Marine Heat Waves - {region_str_title}\n'
                         f'Period: {date_start} to {date_end} | Climatology: {clim_ref}')
             ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
             ax.grid(True, alpha=0.3)
             plt.tight_layout()
             
-            output_file = os.path.join(outputs_dir, f"MHWtimeseries_cmems_{prod}_{datestr}_{region_str}.nc").replace(' ', '')
+            output_file = os.path.join(outputs_dir, f"MHW_timeseries_{datestr}.nc")
+            # output_file = os.path.join(outputs_dir, f"MHWtimeseries_cmems_{prod}_{datestr}_{region_str}.nc").replace(' ', '')
             fig_plt.savefig(output_file.replace('.nc', '.png'), dpi=200, bbox_inches='tight')
             print(f"\tMatplotlib PNG saved: {output_file.replace('.nc', '.png')}")
             plt.close(fig_plt)
