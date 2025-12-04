@@ -274,7 +274,7 @@ def process_maps(args, cmems_rawdataset, clim_rawdataset, meta, outputs_dir,
     })
 
     os.makedirs(outputs_dir, exist_ok=True)
-    output_file = os.path.join(outputs_dir, f"MHW_map_{datestr}_{prod}.nc")
+    output_file = os.path.join(outputs_dir, f"{id_output_type}_{datestr}_{prod}.nc")
     
     # plotting and saving
     success = False
@@ -563,7 +563,7 @@ def process_timeseries(args, cmems_rawdataset, clim_rawdataset, area_rawdataset,
             )
 
             # Set output file - SIMPLIFIED NAME
-            output_file = os.path.join(outputs_dir, f"MHW_timeseries_{datestr}.nc")
+            output_file = os.path.join(outputs_dir, f"mhw_timeseries_{datestr}.nc")
             fig.write_html(output_file.replace('.nc', '.html'), include_plotlyjs='inline')
             print(f"\tHTML figure saved at '{output_file.replace('.nc', '.html')}'")
             
@@ -594,7 +594,7 @@ def process_timeseries(args, cmems_rawdataset, clim_rawdataset, area_rawdataset,
             ax.grid(True, alpha=0.3)
             plt.tight_layout()
             
-            output_file = os.path.join(outputs_dir, f"MHW_timeseries_{datestr}.nc")
+            output_file = os.path.join(outputs_dir, f"mhw_timeseries_{datestr}.nc")
             # output_file = os.path.join(outputs_dir, f"MHWtimeseries_cmems_{prod}_{datestr}_{region_str}.nc").replace(' ', '')
             fig_plt.savefig(output_file.replace('.nc', '.png'), dpi=200, bbox_inches='tight')
             print(f"\tMatplotlib PNG saved: {output_file.replace('.nc', '.png')}")
